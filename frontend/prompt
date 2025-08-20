@@ -1,0 +1,58 @@
+# Student Registration Assignment
+
+## Objective
+Create a backend using C# and .NET for a student registration system. The system consists of:
+1. A **Student Registration Form**.
+2. A **Student List**.
+
+## Assignment Requirements
+Develop APIs for the following functionalities:
+- **POST (1)**: Save student details.
+- **GET (2)**: 
+    - Retrieve the student list.
+    - Retrieve student details by phone number.
+- **DELETE**: Delete a student.
+- **PUT**: Update student details.
+
+## Current Progress
+### Project Setup
+- Project Name: `student-registration`
+- Frontend: React with TypeScript (created using Vite).
+
+### Code Changes
+#### `App.tsx`
+```tsx
+import Registration from "./Registration";
+
+function App() {
+    return <div><Registration /></div>;
+}
+
+export default App;
+```
+
+#### `Registration.tsx`
+```tsx
+function Registration() {
+    return (
+        <form>
+            <label>
+                Name:
+                <input type="text" name="name" />
+            </label>
+            <label>
+                Age:
+                <input type="number" name="age" />
+            </label>
+            <button type="submit">Submit</button>
+        </form>
+    );
+}
+
+export default Registration;
+```
+
+## Additional Resources
+- Attached PDF: Contains assignment details and tutorials.
+- Attached PNGs: Provided UI designs.
+

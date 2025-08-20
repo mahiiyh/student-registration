@@ -9,8 +9,7 @@ type Student = {
   telephone: string;
 };
 import axios from "axios";
-
-const API_URL = "http://localhost:5282/api/students";
+import { API_URL } from "../config/constants";
 
 function Registration() {
   const [form, setForm] = useState<Student>({

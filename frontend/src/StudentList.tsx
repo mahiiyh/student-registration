@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-
-const API_URL = "http://localhost:5282/api/students";
+import { API_URL } from "../config/constants";
 
 interface Student {
   id: number;

@@ -1,10 +1,19 @@
 import { useState } from "react";
+
+type Student = {
+  fullName: string;
+  address: string;
+  dateOfBirth: string;
+  gender: string;
+  email: string;
+  telephone: string;
+};
 import axios from "axios";
 
 const API_URL = "http://localhost:5282/api/students";
 
 function Registration() {
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<Student>({
     fullName: "",
     address: "",
     dateOfBirth: "",
@@ -12,16 +21,23 @@ function Registration() {
     email: "",
     telephone: "",
   });
+  const [localStudents, setLocalStudents] = useState<Student[]>([]);
+  const [editIdx, setEditIdx] = useState<number | null>(null);
+  const [editForm, setEditForm] = useState<Student | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await axios.post(API_URL, form);
-      alert("Student added successfully!");
+    if (editIdx !== null && editForm) {
+      // Update existing
+      const updated = [...localStudents];
+      updated[editIdx] = editForm;
+      setLocalStudents(updated);
+      setEditIdx(null);
+      setEditForm(null);
       setForm({
         fullName: "",
         address: "",
@@ -30,9 +46,68 @@ function Registration() {
         email: "",
         telephone: "",
       });
+      return;
+    }
+    setLocalStudents([...localStudents, form]);
+    setForm({
+      fullName: "",
+      address: "",
+      dateOfBirth: "",
+      gender: "Male",
+      email: "",
+      telephone: "",
+    });
+  };
+
+  const handleEdit = (idx: number) => {
+    setEditIdx(idx);
+    setEditForm({ ...localStudents[idx] });
+    setForm({ ...localStudents[idx] });
+  };
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!editForm) return;
+    setEditForm({ ...editForm, [e.target.name]: e.target.value });
+    setForm({ ...editForm, [e.target.name]: e.target.value });
+  };
+
+  const handleRemove = (idx: number) => {
+    const updated = [...localStudents];
+    updated.splice(idx, 1);
+    setLocalStudents(updated);
+    if (editIdx === idx) {
+      setEditIdx(null);
+      setEditForm(null);
+      setForm({
+        fullName: "",
+        address: "",
+        dateOfBirth: "",
+        gender: "Male",
+        email: "",
+        telephone: "",
+      });
+    }
+  };
+
+  const handleSubmitAll = async () => {
+    if (localStudents.length === 0) return;
+    try {
+      await Promise.all(localStudents.map(s => axios.post(API_URL, s)));
+      alert("All students added successfully!");
+      setLocalStudents([]);
+      setForm({
+        fullName: "",
+        address: "",
+        dateOfBirth: "",
+        gender: "Male",
+        email: "",
+        telephone: "",
+      });
+      setEditIdx(null);
+      setEditForm(null);
     } catch (err) {
       console.error(err);
-      alert("Error saving student");
+      alert("Error saving students");
     }
   };
 
@@ -41,14 +116,14 @@ function Registration() {
       <div className="registration-card-container">
         <div className="registration-card">
           <h2 className="registration-title">Student Registration</h2>
-          <form className="registration-form" onSubmit={handleSubmit}>
+          <form className="registration-form" onSubmit={handleAdd}>
             <div className="registration-row">
               <label htmlFor="fullName">Full Name</label>
               <input
                 id="fullName"
                 name="fullName"
-                value={form.fullName}
-                onChange={handleChange}
+                value={editIdx !== null && editForm ? editForm.fullName : form.fullName}
+                onChange={editIdx !== null ? handleEditChange : handleChange}
                 className="registration-input"
                 autoComplete="off"
                 required
@@ -59,8 +134,8 @@ function Registration() {
               <input
                 id="address"
                 name="address"
-                value={form.address}
-                onChange={handleChange}
+                value={editIdx !== null && editForm ? editForm.address : form.address}
+                onChange={editIdx !== null ? handleEditChange : handleChange}
                 className="registration-input"
                 autoComplete="off"
                 required
@@ -73,8 +148,8 @@ function Registration() {
                   type="date"
                   id="dateOfBirth"
                   name="dateOfBirth"
-                  value={form.dateOfBirth}
-                  onChange={handleChange}
+                  value={editIdx !== null && editForm ? editForm.dateOfBirth : form.dateOfBirth}
+                  onChange={editIdx !== null ? handleEditChange : handleChange}
                   className="registration-input"
                   required
                 />
@@ -87,8 +162,8 @@ function Registration() {
                       type="radio"
                       name="gender"
                       value="Male"
-                      checked={form.gender === "Male"}
-                      onChange={handleChange}
+                      checked={editIdx !== null && editForm ? editForm.gender === "Male" : form.gender === "Male"}
+                      onChange={editIdx !== null ? handleEditChange : handleChange}
                     />
                     Male
                   </label>
@@ -97,8 +172,8 @@ function Registration() {
                       type="radio"
                       name="gender"
                       value="Female"
-                      checked={form.gender === "Female"}
-                      onChange={handleChange}
+                      checked={editIdx !== null && editForm ? editForm.gender === "Female" : form.gender === "Female"}
+                      onChange={editIdx !== null ? handleEditChange : handleChange}
                     />
                     Female
                   </label>
@@ -110,8 +185,8 @@ function Registration() {
               <input
                 id="email"
                 name="email"
-                value={form.email}
-                onChange={handleChange}
+                value={editIdx !== null && editForm ? editForm.email : form.email}
+                onChange={editIdx !== null ? handleEditChange : handleChange}
                 className="registration-input"
                 autoComplete="off"
                 required
@@ -123,8 +198,8 @@ function Registration() {
               <input
                 id="telephone"
                 name="telephone"
-                value={form.telephone}
-                onChange={handleChange}
+                value={editIdx !== null && editForm ? editForm.telephone : form.telephone}
+                onChange={editIdx !== null ? handleEditChange : handleChange}
                 className="registration-input"
                 autoComplete="off"
                 required
@@ -132,9 +207,47 @@ function Registration() {
               />
             </div>
             <div className="registration-btn-row">
-              <button className="registration-submit-btn" type="submit">Submit</button>
+              <button className="registration-submit-btn" type="submit">{editIdx !== null ? "Update" : "Add"}</button>
             </div>
           </form>
+          {/* Table of local students */}
+          {localStudents.length > 0 && (
+            <div style={{ marginTop: "2rem", width: "100%" }}>
+              <h3 style={{ textAlign: "center", marginBottom: "1rem" }}>Entries to Submit</h3>
+              <table style={{ width: "100%", borderCollapse: "collapse", background: "#f7f7f7", borderRadius: "8px" }}>
+                <thead>
+                  <tr style={{ background: "#e3f2fd" }}>
+                    <th style={{ padding: "0.7rem" }}>Full Name</th>
+                    <th style={{ padding: "0.7rem" }}>Address</th>
+                    <th style={{ padding: "0.7rem" }}>DOB</th>
+                    <th style={{ padding: "0.7rem" }}>Gender</th>
+                    <th style={{ padding: "0.7rem" }}>Email</th>
+                    <th style={{ padding: "0.7rem" }}>Telephone</th>
+                    <th style={{ padding: "0.7rem" }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {localStudents.map((s, idx) => (
+                    <tr key={idx}>
+                      <td style={{ padding: "0.7rem" }}>{s.fullName}</td>
+                      <td style={{ padding: "0.7rem" }}>{s.address}</td>
+                      <td style={{ padding: "0.7rem" }}>{s.dateOfBirth}</td>
+                      <td style={{ padding: "0.7rem" }}>{s.gender}</td>
+                      <td style={{ padding: "0.7rem" }}>{s.email}</td>
+                      <td style={{ padding: "0.7rem" }}>{s.telephone}</td>
+                      <td style={{ padding: "0.7rem" }}>
+                        <button style={{ marginRight: "0.5rem" }} onClick={() => handleEdit(idx)}>✏️ Edit</button>
+                        <button onClick={() => handleRemove(idx)}>🗑️ Remove</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="registration-btn-row" style={{ marginTop: "1.5rem" }}>
+                <button className="registration-submit-btn" type="button" onClick={handleSubmitAll}>Submit All</button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
       <style>{`

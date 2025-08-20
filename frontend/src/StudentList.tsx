@@ -16,6 +16,39 @@ interface Student {
 function StudentList() {
   const [students, setStudents] = useState<Student[]>([]);
   const [searchTel, setSearchTel] = useState("");
+  const [editIdx, setEditIdx] = useState<number | null>(null);
+  const [editForm, setEditForm] = useState<Student | null>(null);
+  const handleEdit = (idx: number) => {
+    setEditIdx(idx);
+    setEditForm({ ...students[idx] });
+  };
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!editForm) return;
+    setEditForm({ ...editForm, [e.target.name]: e.target.value });
+  };
+
+  const handleUpdate = async () => {
+    if (editForm) {
+      try {
+        await axios.put(`${API_URL}/${editForm.id}`, editForm);
+        const updated = [...students];
+        updated[editIdx!] = editForm;
+        setStudents(updated);
+        setEditIdx(null);
+        setEditForm(null);
+        alert("Student updated successfully!");
+      } catch (err) {
+        console.error(err);
+        alert("Error updating student");
+      }
+    }
+  };
+
+  const handleCancel = () => {
+    setEditIdx(null);
+    setEditForm(null);
+  };
 
   const fetchStudents = async () => {
     try {
@@ -85,18 +118,34 @@ function StudentList() {
                     <td colSpan={5} style={{ textAlign: "center", color: "#888" }}>No students found.</td>
                   </tr>
                 ) : (
-                  students.map((s) => (
-                    <tr key={s.id}>
-                      <td>{s.fullName}</td>
-                      <td>{s.dateOfBirth.split("T")[0]}</td>
-                      <td>{s.email}</td>
-                      <td>{s.telephone}</td>
-                      <td>
-                        <button className="studentlist-action-btn delete" title="Delete" onClick={() => deleteStudent(s.id)}>
-                          🗑️
-                        </button>
-                      </td>
-                    </tr>
+                  students.map((s, idx) => (
+                    editIdx === idx && editForm ? (
+                      <tr key={s.id} style={{ background: "#e3f2fd" }}>
+                        <td><input name="fullName" value={editForm.fullName} onChange={handleEditChange} className="studentlist-input" /></td>
+                        <td><input name="dateOfBirth" type="date" value={editForm.dateOfBirth.split("T")[0]} onChange={handleEditChange} className="studentlist-input" /></td>
+                        <td><input name="email" value={editForm.email} onChange={handleEditChange} className="studentlist-input" /></td>
+                        <td><input name="telephone" value={editForm.telephone} onChange={handleEditChange} className="studentlist-input" /></td>
+                        <td>
+                          <button className="studentlist-action-btn edit" title="Update" type="button" onClick={handleUpdate}>✔️</button>
+                          <button className="studentlist-action-btn" title="Cancel" type="button" onClick={handleCancel}>✖️</button>
+                        </td>
+                      </tr>
+                    ) : (
+                      <tr key={s.id}>
+                        <td>{s.fullName}</td>
+                        <td>{s.dateOfBirth.split("T")[0]}</td>
+                        <td>{s.email}</td>
+                        <td>{s.telephone}</td>
+                        <td>
+                          <button className="studentlist-action-btn edit" title="Edit" onClick={() => handleEdit(idx)}>
+                            ✏️
+                          </button>
+                          <button className="studentlist-action-btn delete" title="Delete" onClick={() => deleteStudent(s.id)}>
+                            🗑️
+                          </button>
+                        </td>
+                      </tr>
+                    )
                   ))
                 )}
               </tbody>

@@ -1,4 +1,4 @@
-namespace student_registration.Models
+namespace student_registration.Core.Entities
 {
     public class Student
     {
@@ -9,5 +9,7 @@ namespace student_registration.Models
         public string Gender { get; set; } = "Male";
         public string Email { get; set; } = string.Empty;
         public string Telephone { get; set; } = string.Empty;
+
+        // Additional domain logic can be added here if needed
     }
 }

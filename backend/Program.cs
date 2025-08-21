@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using student_registration.Data;
+using student_registration.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +20,14 @@ builder.Services.AddCors(options =>
                         .AllowAnyMethod()
                         .AllowAnyHeader());
 });
+
+// Register use cases
+builder.Services.AddScoped<student_registration.Application.UseCases.RegisterStudent>();
+builder.Services.AddScoped<student_registration.Application.UseCases.GetAllStudents>();
+builder.Services.AddScoped<student_registration.Application.UseCases.GetStudentByTelephone>();
+builder.Services.AddScoped<student_registration.Application.UseCases.UpdateStudent>();
+builder.Services.AddScoped<student_registration.Application.UseCases.DeleteStudent>();
+builder.Services.AddScoped<student_registration.Core.Interfaces.IStudentRepository, student_registration.Infrastructure.Persistence.StudentRepository>();
 
 var app = builder.Build();
 

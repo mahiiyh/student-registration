@@ -1,28 +1,41 @@
 ### **Backend**
-The backend is built using **.NET** (likely ASP.NET Core) and serves as the API layer for the application. Here's a detailed explanation:
+The backend is built using **.NET** (ASP.NET Core) and follows the **Clean Architecture** principles. Here's a detailed explanation:
 
 #### **Key Files and Folders**
 1. **`Program.cs`**:
    - The entry point of the application.
    - Configures the web server, middleware, and services.
+   - Registers dependencies for use cases and repositories.
 
 2. **`Controllers/StudentsController.cs`**:
    - A controller that handles HTTP requests related to students.
-   - Likely includes endpoints for CRUD operations (Create, Read, Update, Delete) on student data.
+   - Uses use cases for CRUD operations (Create, Read, Update, Delete) on student data.
 
-3. **`Data/StudentDbContext.cs`**:
+3. **`Core/Entities/Student.cs`**:
+   - Defines the `Student` entity, which represents a student in the system.
+   - Includes properties like `Id`, `FullName`, `Address`, `DateOfBirth`, etc.
+
+4. **`Core/Interfaces/IStudentRepository.cs`**:
+   - Defines the contract for the `StudentRepository`.
+   - Includes methods like `AddStudentAsync`, `GetStudentsAsync`, etc.
+
+5. **`Application/UseCases/`**:
+   - Contains use cases like `RegisterStudent`, `GetAllStudents`, `UpdateStudent`, etc.
+   - Encapsulates application-specific business logic.
+
+6. **`Infrastructure/Persistence/StudentDbContext.cs`**:
    - Represents the database context using **Entity Framework Core**.
    - Manages the connection to the database and provides access to the `Students` table.
 
-4. **`Models/Student.cs`**:
-   - Defines the `Student` entity, which represents a student in the system.
-   - Likely includes properties like `Id`, `Name`, `Age`, etc.
+7. **`Infrastructure/Persistence/StudentRepository.cs`**:
+   - Implements the `IStudentRepository` interface.
+   - Handles database operations for the `Student` entity.
 
-5. **`appsettings.json` and `appsettings.Development.json`**:
+8. **`appsettings.json` and `appsettings.Development.json`**:
    - Configuration files for the application.
    - Contain settings like database connection strings, logging, and other environment-specific configurations.
 
-6. **`Properties/launchSettings.json`**:
+9. **`Properties/launchSettings.json`**:
    - Configures how the application is launched during development (e.g., environment variables, ports).
 
 #### **Build and Output**
@@ -41,7 +54,7 @@ The frontend is built using **React** with **TypeScript** and uses **Vite** as t
 1. **`src/`**:
    - Contains the main application code.
    - **`App.tsx`**: The root component of the application.
-   - **`Registration.tsx`**: Likely a form for registering students.
+   - **`Registration.tsx`**: A form for registering students.
    - **`StudentList.tsx`**: Displays a list of registered students.
    - **`main.tsx`**: The entry point for the React application.
 
@@ -49,7 +62,7 @@ The frontend is built using **React** with **TypeScript** and uses **Vite** as t
    - Contains static assets like images and icons (e.g., `vite.svg`).
 
 3. **`config/constants.ts`**:
-   - Likely contains configuration constants (e.g., API URLs).
+   - Contains configuration constants (e.g., API URLs).
 
 4. **`vite.config.ts`**:
    - Configuration file for Vite, specifying build settings, plugins, etc.
@@ -68,7 +81,7 @@ The frontend is built using **React** with **TypeScript** and uses **Vite** as t
 
 ### **How It Works**
 1. **Frontend-Backend Communication**:
-   - The frontend communicates with the backend via HTTP requests (likely using Axios).
+   - The frontend communicates with the backend via HTTP requests (using Axios).
    - The backend exposes RESTful APIs for managing student data.
 
 2. **Database**:

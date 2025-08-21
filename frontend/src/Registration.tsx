@@ -1,18 +1,10 @@
 import { useState } from "react";
-
-type Student = {
-  fullName: string;
-  address: string;
-  dateOfBirth: string;
-  gender: string;
-  email: string;
-  telephone: string;
-};
-import axios from "axios";
-import { API_URL } from "../config/constants";
+import type { Student } from "./core/entities/Student";
+import { registerStudent } from "./application/useCases/RegisterStudent";
 
 function Registration() {
   const [form, setForm] = useState<Student>({
+    id: 0, // Temporary ID for local state
     fullName: "",
     address: "",
     dateOfBirth: "",
@@ -37,18 +29,16 @@ function Registration() {
       setLocalStudents(updated);
       setEditIdx(null);
       setEditForm(null);
-      setForm({
-        fullName: "",
-        address: "",
-        dateOfBirth: "",
-        gender: "Male",
-        email: "",
-        telephone: "",
-      });
+      resetForm();
       return;
     }
     setLocalStudents([...localStudents, form]);
+    resetForm();
+  };
+
+  const resetForm = () => {
     setForm({
+      id: 0,
       fullName: "",
       address: "",
       dateOfBirth: "",
@@ -58,16 +48,23 @@ function Registration() {
     });
   };
 
+  const handleSubmitAll = async () => {
+    if (localStudents.length === 0) return;
+    try {
+      await Promise.all(localStudents.map(student => registerStudent(student)));
+      alert("All students added successfully!");
+      setLocalStudents([]);
+      resetForm();
+    } catch (err) {
+      console.error(err);
+      alert("Error saving students");
+    }
+  };
+
   const handleEdit = (idx: number) => {
     setEditIdx(idx);
     setEditForm({ ...localStudents[idx] });
     setForm({ ...localStudents[idx] });
-  };
-
-  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!editForm) return;
-    setEditForm({ ...editForm, [e.target.name]: e.target.value });
-    setForm({ ...editForm, [e.target.name]: e.target.value });
   };
 
   const handleRemove = (idx: number) => {
@@ -77,36 +74,7 @@ function Registration() {
     if (editIdx === idx) {
       setEditIdx(null);
       setEditForm(null);
-      setForm({
-        fullName: "",
-        address: "",
-        dateOfBirth: "",
-        gender: "Male",
-        email: "",
-        telephone: "",
-      });
-    }
-  };
-
-  const handleSubmitAll = async () => {
-    if (localStudents.length === 0) return;
-    try {
-      await Promise.all(localStudents.map(s => axios.post(API_URL, s)));
-      alert("All students added successfully!");
-      setLocalStudents([]);
-      setForm({
-        fullName: "",
-        address: "",
-        dateOfBirth: "",
-        gender: "Male",
-        email: "",
-        telephone: "",
-      });
-      setEditIdx(null);
-      setEditForm(null);
-    } catch (err) {
-      console.error(err);
-      alert("Error saving students");
+      resetForm();
     }
   };
 
@@ -122,7 +90,7 @@ function Registration() {
                 id="fullName"
                 name="fullName"
                 value={editIdx !== null && editForm ? editForm.fullName : form.fullName}
-                onChange={editIdx !== null ? handleEditChange : handleChange}
+                onChange={editIdx !== null ? handleChange : handleChange}
                 className="registration-input"
                 autoComplete="off"
                 required
@@ -134,7 +102,7 @@ function Registration() {
                 id="address"
                 name="address"
                 value={editIdx !== null && editForm ? editForm.address : form.address}
-                onChange={editIdx !== null ? handleEditChange : handleChange}
+                onChange={editIdx !== null ? handleChange : handleChange}
                 className="registration-input"
                 autoComplete="off"
                 required
@@ -148,7 +116,7 @@ function Registration() {
                   id="dateOfBirth"
                   name="dateOfBirth"
                   value={editIdx !== null && editForm ? editForm.dateOfBirth : form.dateOfBirth}
-                  onChange={editIdx !== null ? handleEditChange : handleChange}
+                  onChange={editIdx !== null ? handleChange : handleChange}
                   className="registration-input"
                   required
                 />
@@ -162,7 +130,7 @@ function Registration() {
                       name="gender"
                       value="Male"
                       checked={editIdx !== null && editForm ? editForm.gender === "Male" : form.gender === "Male"}
-                      onChange={editIdx !== null ? handleEditChange : handleChange}
+                      onChange={editIdx !== null ? handleChange : handleChange}
                     />
                     Male
                   </label>
@@ -172,7 +140,7 @@ function Registration() {
                       name="gender"
                       value="Female"
                       checked={editIdx !== null && editForm ? editForm.gender === "Female" : form.gender === "Female"}
-                      onChange={editIdx !== null ? handleEditChange : handleChange}
+                      onChange={editIdx !== null ? handleChange : handleChange}
                     />
                     Female
                   </label>
@@ -185,7 +153,7 @@ function Registration() {
                 id="email"
                 name="email"
                 value={editIdx !== null && editForm ? editForm.email : form.email}
-                onChange={editIdx !== null ? handleEditChange : handleChange}
+                onChange={editIdx !== null ? handleChange : handleChange}
                 className="registration-input"
                 autoComplete="off"
                 required
@@ -198,7 +166,7 @@ function Registration() {
                 id="telephone"
                 name="telephone"
                 value={editIdx !== null && editForm ? editForm.telephone : form.telephone}
-                onChange={editIdx !== null ? handleEditChange : handleChange}
+                onChange={editIdx !== null ? handleChange : handleChange}
                 className="registration-input"
                 autoComplete="off"
                 required

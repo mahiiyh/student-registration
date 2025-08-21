@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using student_registration.Models;
+using student_registration.Core.Entities;
 
-namespace student_registration.Data
+namespace student_registration.Infrastructure.Persistence
 {
     public class StudentDbContext : DbContext
     {
